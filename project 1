@@ -1,0 +1,25 @@
+// C++ code
+float reading=0;
+float ideal=50;//ideal temperature can be anything depending on the reaction;
+
+void setup()
+{
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(2,OUTPUT);//To supply current to heater(resistors),LED
+  pinMode(A0, INPUT);//to take input temperature
+}
+
+void loop()
+{
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000); // Wait for 1000 millisecond(s)
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000); // Wait for 1000 millisecond(s)
+  reading = analogRead(A0);//measuring temperature
+  float mvolts= reading*5000/1024;//converting reading to millivolts
+  float temperature=(mvolts-500)/10;//getting temperature
+  if(temperature<ideal)//if temperature is less than that required for reaction
+    digitalWrite(2, HIGH);//turn on heater
+  else//if it is more than ideal temperature
+    digitalWrite(2, LOW);//turn off heater      
+}

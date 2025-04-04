@@ -1,0 +1,112 @@
+// C++ code
+#include<Servo.h>
+Servo servo1;
+int right=4,forward=3,left=2,inches,cm;
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(2,INPUT);
+  pinMode(3,INPUT);
+  pinMode(4,INPUT);
+  servo1.attach(5);
+  pinMode(6,OUTPUT);
+   pinMode(8,OUTPUT);
+   pinMode(12,OUTPUT);
+   pinMode(10,OUTPUT);
+  
+  digitalWrite(6,HIGH);
+  servo1.write(90);
+}
+float Distance(int triggerPin, int echoPin)//To measure the distance
+{
+  pinMode(triggerPin, OUTPUT);  // Clear the trigger
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigger pin to HIGH state for 10 microseconds
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+  pinMode(echoPin, INPUT);
+  // Reads the echo pin, and returns the sound wave travel time in microseconds
+  cm= 0.01723 * pulseIn(echoPin, HIGH);
+  inches = (cm / 2.54);
+  Serial.print(inches);
+  Serial.print("in, ");
+  Serial.print(cm);
+  Serial.println("cm");
+  delay(100); // Wait for 100 millisecond(s)
+  return cm;
+}
+int forwardcheck(int forward)//to check if there is any obstacle on the current path of the object
+{
+  if(Distance(forward,forward)<100)//if there is obstacle(within 100cm)
+  {
+    digitalWrite(6,LOW);//turn d.c motor responsible for wheel rotation off
+    return 1;//reporting that obstacle is there
+  }
+  else
+  {digitalWrite(6,HIGH);//otherwise motor should remain on
+   return 0;}
+}
+
+void loop()
+{
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000); // Wait for 1000 millisecond(s)
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000); // Wait for 1000 millisecond(s)
+  
+  
+  
+  delay(100);
+  if(forwardcheck(forward)==1)//if there is obstacle
+  {
+    if( (Distance(right,right)>Distance(left,left)) && (Distance(right,right)>200))//if dead end on right path is at a further distance than the dead end on the left path. The path should end or in other words any obstacle present should be atleast 200cm away.
+    {
+      digitalWrite(8,HIGH);//turn the LED near the right sensor on to indicate that we are turninig towards right
+      for(int i=90;i>=0;i--)//servo motor position is kept at 90 so that it can go both clockwise and anticlockwise. If it was at 0 it would only go anticlockwise and if it was at 180 it would only go clockwise
+      {
+         servo1.write(i);//slowly turning servo motor which is acting like axle in this case
+         delay(20);
+      }
+      digitalWrite(6,HIGH);//starting dc motor so that wheels start moving and body turns right. Assuming that it takes 5 seconds to fully turn
+      delay(5000);
+      digitalWrite(6,LOW);//turning off motor otherwise it will turn further
+      for(int i=0;i<=90;i++)//straightening axle of wheels
+      {
+         servo1.write(i);
+         delay(20);
+      }
+      delay(1000);
+      digitalWrite(8,LOW);//turning off LED to indicate that turning is done
+      digitalWrite(6,HIGH);//starting dc motor so that it ccan move forward
+    }
+    else if((Distance(left,left)>=Distance(right,right)) && (Distance(left,left)>200))//same as above only this time we want to turn left
+    {
+      digitalWrite(12,HIGH);
+      for(int i=0;i<=90;i++)
+      {
+         servo1.write(i);
+         delay(20);
+      }
+      digitalWrite(6,HIGH);
+      delay(5000);
+      digitalWrite(6,LOW);
+      for(int i=90;i>=0;i--)
+      {
+         servo1.write(i);
+         delay(20);
+      } 
+      delay(1000);
+      digitalWrite(12,LOW);  
+      
+    }
+    else//Incase there is an obstacle within 200m at both left and right end, then rover is stuck and buzzer will be sounded.
+      digitalWrite(10,HIGH);
+  }
+    
+  
+  
+}

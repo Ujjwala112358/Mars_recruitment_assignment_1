@@ -16,8 +16,8 @@ void setup()
    pinMode(12,OUTPUT);
    pinMode(10,OUTPUT);
   
-  digitalWrite(6,HIGH);
-  servo1.write(90);
+  digitalWrite(6,HIGH);//Turn d.c motor on
+  servo1.write(90);//initial servo motor position is kept at 90 so that it can go both clockwise and anticlockwise. If it was at 0 it would only go anticlockwise and if it was at 180 it would only go clockwise
 }
 float Distance(int triggerPin, int echoPin)//To measure the distance
 {
@@ -66,7 +66,7 @@ void loop()
     if( (Distance(right,right)>Distance(left,left)) && (Distance(right,right)>200))//if dead end on right path is at a further distance than the dead end on the left path. The path should end or in other words any obstacle present should be atleast 200cm away.
     {
       digitalWrite(8,HIGH);//turn the LED near the right sensor on to indicate that we are turninig towards right
-      for(int i=90;i>=0;i--)//servo motor position is kept at 90 so that it can go both clockwise and anticlockwise. If it was at 0 it would only go anticlockwise and if it was at 180 it would only go clockwise
+      for(int i=90;i>=0;i--)//turning clockwise
       {
          servo1.write(i);//slowly turning servo motor which is acting like axle in this case
          delay(20);
